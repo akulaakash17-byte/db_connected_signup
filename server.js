@@ -13,6 +13,24 @@ const pool = new Pool({
     ssl: { rejectUnauthorized: false } // Required for Render
 });
 
+// --- NEW: AUTOMATIC TABLE CREATION ---
+// This runs as soon as the server starts
+pool.query(`
+    CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        username VARCHAR(50) NOT NULL,
+        email VARCHAR(100) NOT NULL,
+        password_hash TEXT NOT NULL
+    );
+`, (err, res) => {
+    if (err) {
+        console.error("❌ Database table error:", err.message);
+    } else {
+        console.log("✅ Database table 'users' is ready!");
+    }
+});
+// -------------------------------------
+
 // 2. Serve the HTML page
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
@@ -24,7 +42,7 @@ app.post('/register', async (req, res) => {
 
     try {
         const queryText = 'INSERT INTO users(username, email, password_hash) VALUES($1, $2, $3) RETURNING id';
-        const values = [username, email, password]; // Note: Use bcrypt to hash passwords in production!
+        const values = [username, email, password]; 
         
         const result = await pool.query(queryText, values);
         
@@ -34,9 +52,18 @@ app.post('/register', async (req, res) => {
         res.status(500).send("Database Error: " + err.message);
     }
 });
+// Add this to see your database content in the browser
+app.get('/users', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM users');
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).send("Error fetching users: " + err.message);
+    }
+});
 
 // 4. Start Server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
