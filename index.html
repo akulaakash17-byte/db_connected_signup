@@ -1,21 +1,306 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Signup Page</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS | Join the Network</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; padding-top: 50px; }
-        form { display: flex; flex-direction: column; width: 300px; gap: 10px; }
-        input { padding: 10px; }
-        button { padding: 10px; background: #007bff; color: white; border: none; cursor: pointer; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #05070a;
+            --surface: rgba(14, 19, 32, 0.85);
+            --border: #1e2a40;
+            --accent: #00f0ff;
+            --accent2: #7b61ff;
+            --text: #e2e8f0;
+            --muted: #64748b;
+            --error: #ff4d6d;
+            --success: #00f0a0;
+            --glow: rgba(0, 240, 255, 0.3);
+        }
+
+        body {
+            font-family: 'Syne', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* Perspective Grid Background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: 
+                linear-gradient(var(--border) 1px, transparent 1px),
+                linear-gradient(90deg, var(--border) 1px, transparent 1px);
+            background-size: 50px 50px;
+            mask-image: radial-gradient(circle at center, black, transparent 80%);
+            animation: gridMove 20s linear infinite;
+            pointer-events: none;
+            opacity: 0.4;
+            z-index: -1;
+        }
+
+        @keyframes gridMove {
+            0% { transform: perspective(500px) rotateX(25deg) translateY(0); }
+            100% { transform: perspective(500px) rotateX(25deg) translateY(50px); }
+        }
+
+        /* Ambient Glow Orbs */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.15;
+            pointer-events: none;
+            z-index: -1;
+        }
+        .orb1 { width: 500px; height: 500px; background: var(--accent2); top: -200px; left: -100px; animation: float 10s infinite alternate; }
+        .orb2 { width: 400px; height: 400px; background: var(--accent); bottom: -100px; right: -100px; animation: float 12s infinite alternate-reverse; }
+
+        @keyframes float { 
+            0% { transform: translate(0,0) scale(1); } 
+            100% { transform: translate(40px, 40px) scale(1.1); } 
+        }
+
+        /* The Card Container */
+        .card {
+            position: relative;
+            background: var(--surface);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 48px;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Aesthetic Top Highlight */
+        .card::after {
+            content: '';
+            position: absolute;
+            top: -1px; left: 20%; right: 20%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            border-radius: 2px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 32px;
+        }
+
+        .logo-icon {
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 0 20px var(--glow);
+        }
+
+        .logo-text {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            background: linear-gradient(90deg, #fff, var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h1 { font-size: 32px; font-weight: 800; margin-bottom: 4px; letter-spacing: -1px; }
+        
+        .subtitle {
+            font-family: 'Space Mono', monospace;
+            font-size: 13px;
+            color: var(--accent);
+            margin-bottom: 36px;
+            opacity: 0.7;
+            text-transform: lowercase;
+        }
+
+        /* Form Styling */
+        .form-group { margin-bottom: 22px; }
+
+        label {
+            display: block;
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            color: var(--muted);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 18px;
+            color: #fff;
+            font-family: 'Space Mono', monospace;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: rgba(0, 240, 255, 0.05);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.1);
+        }
+
+        /* Button Styling */
+        .btn {
+            width: 100%;
+            padding: 16px;
+            background: #fff;
+            border: none;
+            border-radius: 12px;
+            color: #000;
+            font-family: 'Syne', sans-serif;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            margin-top: 12px;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            background: var(--accent);
+            box-shadow: 0 0 30px var(--glow);
+            transform: translateY(-2px);
+        }
+
+        /* EJS Alert Boxes */
+        .alert {
+            padding: 14px;
+            border-radius: 12px;
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+            margin-bottom: 24px;
+            border: 1px solid transparent;
+            display: none;
+        }
+        .alert.active { display: block; }
+        .alert.error { background: rgba(255, 77, 109, 0.1); border-color: var(--error); color: var(--error); }
+        .alert.success { background: rgba(0, 240, 160, 0.1); border-color: var(--success); color: var(--success); }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 30px 0;
+            color: var(--muted);
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+        }
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+            margin: 0 15px;
+        }
+
+        .footer-link {
+            text-align: center;
+            font-family: 'Space Mono', monospace;
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .footer-link a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 700;
+            transition: color 0.2s;
+        }
+
+        .footer-link a:hover {
+            color: var(--accent);
+        }
     </style>
 </head>
 <body>
-    <form action="/register" method="POST">
-        <h2>Create Account</h2>
-        <input type="text" name="username" placeholder="Username" required>
-        <input type="email" name="email" placeholder="Email" required>
-        <input type="password" name="password" placeholder="Password" required>
-        <button type="submit">Sign Up</button>
-    </form>
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+
+    <div class="card">
+        <div class="logo">
+            <div class="logo-icon">⚡</div>
+            <span class="logo-text">NEXUS</span>
+        </div>
+
+        <h1>Create Account</h1>
+        <p class="subtitle">// Establish connection</p>
+
+        <% if (locals.error && error) { %>
+            <div class="alert error active"><%= error %></div>
+        <% } %>
+        
+        <% if (locals.success && success) { %>
+            <div class="alert success active"><%= success %></div>
+        <% } %>
+
+        <div id="js-alert" class="alert"></div>
+
+        <form action="/register" method="POST">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="nexus_user" required autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" placeholder="user@nexus.io" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="••••••••" required minlength="6">
+            </div>
+            <button type="submit" class="btn">Initialize Join →</button>
+        </form>
+
+        <div class="divider"><span>Authentication Required</span></div>
+
+        <div class="footer-link">
+            Already linked? <a href="/login">Sign In</a>
+        </div>
+    </div>
+
+    <script>
+        // Handles messages passed via URL query parameters
+        const params = new URLSearchParams(window.location.search);
+        const jsAlert = document.getElementById('js-alert');
+        
+        if (params.get('error')) {
+            jsAlert.textContent = decodeURIComponent(params.get('error'));
+            jsAlert.classList.add('error', 'active');
+        } else if (params.get('success')) {
+            jsAlert.textContent = decodeURIComponent(params.get('success'));
+            jsAlert.classList.add('success', 'active');
+        }
+    </script>
 </body>
 </html>
